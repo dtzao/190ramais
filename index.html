@@ -18,16 +18,31 @@
   <div class="absolute top-4 right-4 text-sm text-gray-500 dark:text-gray-300 font-semibold">
     SD PM 154.466-7 ANDERSON SILVA
   </div>
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 max-w-md w-full space-y-4">
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-white text-center">Contatos de Emergência</h1>
-      <input id="search" type="text" placeholder="Buscar contato..." class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700" />
-      <div class="flex space-x-2">
-        <input id="novoContato" type="text" placeholder="Novo contato..." class="flex-1 p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-green-500 bg-gray-50 dark:bg-gray-700" />
-        <button id="addContato" class="bg-green-500 text-white px-4 py-3 rounded-xl hover:bg-green-600 transition">Adicionar</button>
+
+  <div class="flex min-h-screen">
+    <!-- Lateral -->
+    <aside class="w-60 bg-gray-200 dark:bg-gray-800 p-4 space-y-2">
+      <h2 class="font-bold text-lg mb-2">🌐 Sites Internos</h2>
+      <select id="siteSelector" class="w-full p-2 rounded-lg bg-white dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+        <option value="">Selecione um site</option>
+        <option value="http://intranet.policiamilitar.sp.gov.br/">Intranet PM</option>
+        <option value="https://detecta.sp.gov.br/Home/Login/?query=denied&ReturnUrl=%2f">Detecta</option>
+        <option value="https://copomvdm.github.io/escala/">Escala COPOM VDM</option>
+      </select>
+    </aside>
+
+    <!-- Conteúdo principal -->
+    <main class="flex-1 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 max-w-md w-full space-y-4">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white text-center">Contatos de Emergência</h1>
+        <input id="search" type="text" placeholder="Buscar contato..." class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700" />
+        <div class="flex space-x-2">
+          <input id="novoContato" type="text" placeholder="Novo contato..." class="flex-1 p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-green-500 bg-gray-50 dark:bg-gray-700" />
+          <button id="addContato" class="bg-green-500 text-white px-4 py-3 rounded-xl hover:bg-green-600 transition">Adicionar</button>
+        </div>
+        <ul id="lista" class="space-y-2"></ul>
       </div>
-      <ul id="lista" class="space-y-2"></ul>
-    </div>
+    </main>
   </div>
 
   <script>
@@ -35,6 +50,12 @@
     const search = document.getElementById('search');
     const novoContato = document.getElementById('novoContato');
     const addContato = document.getElementById('addContato');
+    const siteSelector = document.getElementById('siteSelector');
+
+    siteSelector.addEventListener('change', () => {
+      const url = siteSelector.value;
+      if (url) window.open(url, '_blank');
+    });
 
     let contatos = JSON.parse(localStorage.getItem('contatos')) || [
       "5999 MIKE AI",

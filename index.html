@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lista de Contatos de Emergência</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    mark {
+      background-color: #facc15; /* amarelo destaque */
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Assinatura -->
+  <div class="absolute top-4 right-4 text-sm text-gray-500 font-semibold">
+    SD PM 154.466-7 ANDERSON SILVA
+  </div>
+
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full space-y-4">
+      <h1 class="text-2xl font-bold text-gray-800 text-center">Contatos de Emergência</h1>
+
+      <!-- Campo de busca -->
+      <input id="search" type="text" placeholder="Buscar contato..." 
+             class="w-full p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500">
+
+      <!-- Campo para adicionar -->
+      <div class="flex space-x-2">
+        <input id="novoContato" type="text" placeholder="Novo contato..." 
+               class="flex-1 p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500">
+        <button id="addContato" 
+                class="bg-green-500 text-white px-4 py-3 rounded-xl hover:bg-green-600 transition">Adicionar</button>
+      </div>
+
+      <!-- Lista de contatos -->
+      <ul id="lista" class="space-y-2"></ul>
+    </div>
+  </div>
+
+  <script>
+    const lista = document.getElementById('lista');
+    const search = document.getElementById('search');
+    const novoContato = document.getElementById('novoContato');
+    const addContato = document.getElementById('addContato');
+
+    let contatos = JSON.parse(localStorage.getItem('contatos')) || [
+      "5999 MIKE AI",
+      "9939 SOP MIKE",
+      "6551 SOP COBOM - CLINICO",
+      "3168 / 3166 / 3167 SUP. 190",
+      "3169 SUP COBOM",
+      "3163 / 3162 / 3161 SUP. DEJEM",
+      "9959 SUP AMBIENTAL",
+      "192 SAMU",
+      "156 CET",
+      "0800 061 8080 IBAMA - DENUNCIAR",
+      "181 DISQUE DENUNCIA",
+      "197 POLICIA CIVIL",
+      "194 POLICIA FEDERAL",
+      "151 PROCON SP",
+      "191 PRF",
+      "199 DEFESA CIVIL",
+      "193 BOMBEIRO MILITAR",
+      "153 GUARDA MUNICIPAL SP",
+      "156 PREFEITURA SP",
+      "129 DEFENSORIA PUBLICA",
+      "181 DISQUE DENÚNCIA"
+    ];
+
+    function salvarLocalStorage() {
+      localStorage.setItem('contatos', JSON.stringify(contatos));
+    }
+
+    function renderLista(filtro = "") {
+      lista.innerHTML = "";
+      const termo = filtro.trim().toLowerCase();
+
+      contatos.forEach((contato, index) => {
+        if (contato.toLowerCase().includes(termo)) {
+          const li = document.createElement('li');
+          li.className = "p-3 bg-gray-50 rounded-xl border flex justify-between items-center hover:bg-gray-100 transition";
+
+          const span = document.createElement('span');
+          if (termo) {
+            const regex = new RegExp(`(${termo})`, "gi");
+            span.innerHTML = contato.replace(regex, `<mark>$1</mark>`);
+          } else {
+            span.textContent = contato;
+          }
+
+          const btns = document.createElement('div');
+          btns.className = "flex space-x-2";
+
+          // Botão copiar
+          const btnCopiar = document.createElement('button');
+          btnCopiar.textContent = "Copiar";
+          btnCopiar.className = "bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-600 text-xs";
+          btnCopiar.addEventListener('click', () => {
+            const numero = contato.match(/[\d\s/]+/g)?.[0].trim() || contato;
+            navigator.clipboard.writeText(numero);
+            btnCopiar.textContent = "Copiado!";
+            setTimeout(() => btnCopiar.textContent = "Copiar", 1500);
+          });
+
+          // Botão editar
+          const btnEditar = document.createElement('button');
+          btnEditar.textContent = "Editar";
+          btnEditar.className = "bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 text-xs";
+          btnEditar.addEventListener('click', () => {
+            const novoTexto = prompt("Editar contato:", contato);
+            if (novoTexto) {
+              contatos[index] = novoTexto.trim();
+              salvarLocalStorage();
+              renderLista(search.value);
+            }
+          });
+
+          // Botão excluir
+          const btnExcluir = document.createElement('button');
+          btnExcluir.textContent = "Excluir";
+          btnExcluir.className = "bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 text-xs";
+          btnExcluir.addEventListener('click', () => {
+            if (confirm("Tem certeza que deseja excluir este contato?")) {
+              contatos.splice(index, 1);
+              salvarLocalStorage();
+              renderLista(search.value);
+            }
+          });
+
+          btns.appendChild(btnCopiar);
+          btns.appendChild(btnEditar);
+          btns.appendChild(btnExcluir);
+
+          li.appendChild(span);
+          li.appendChild(btns);
+
+          lista.appendChild(li);
+        }
+      });
+
+      if (lista.children.length === 0) {
+        const vazio = document.createElement('li');
+        vazio.className = "text-gray-500 italic";
+        vazio.textContent = "Nenhum contato encontrado.";
+        lista.appendChild(vazio);
+      }
+    }
+
+    search.addEventListener('input', (e) => {
+      renderLista(e.target.value);
+    });
+
+    addContato.addEventListener('click', () => {
+      const novo = novoContato.value.trim();
+      if (novo) {
+        contatos.push(novo);
+        novoContato.value = "";
+        salvarLocalStorage();
+        renderLista(search.value);
+      }
+    });
+
+    // Render inicial
+    renderLista();
+  </script>
+</body>
+</html>
